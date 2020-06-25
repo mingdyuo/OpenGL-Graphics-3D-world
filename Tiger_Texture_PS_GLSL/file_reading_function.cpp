@@ -1,8 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <GL/glew.h>
-#include <GL/freeglut.h>
-#include <FreeImage/FreeImage.h>
+#include "file_reading_function.h"
 
 int read_geometry(GLfloat** object, int bytes_per_primitive, char* filename) {
 	int n_triangles;

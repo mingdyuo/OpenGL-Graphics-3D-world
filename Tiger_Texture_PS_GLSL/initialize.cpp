@@ -147,14 +147,14 @@ void initialize_lights_and_material(void) { // follow OpenGL conventions for ini
 void set_up_scene_lights(void) {
 	// point_light_EC: use light 0
 	light[0].light_on = 1;
-	light[0].position[0] = 0.0f; light[0].position[1] = 100.0f; 	// point light position in EC
-	light[0].position[2] = 0.0f; light[0].position[3] = 1.0f;
+	light[0].position[0] = 200.0f; light[0].position[1] = 100.0f; 	// point light position in EC
+	light[0].position[2] = 200.0f; light[0].position[3] = 1.0f;
 
-	light[0].ambient_color[0] = 0.13f; light[0].ambient_color[1] = 0.13f;
-	light[0].ambient_color[2] = 0.13f; light[0].ambient_color[3] = 1.0f;
+	light[0].ambient_color[0] = 0.43f; light[0].ambient_color[1] = 0.43f;
+	light[0].ambient_color[2] = 0.45f; light[0].ambient_color[3] = 1.0f;
 
-	light[0].diffuse_color[0] = 0.5f; light[0].diffuse_color[1] = 0.5f;
-	light[0].diffuse_color[2] = 0.5f; light[0].diffuse_color[3] = 1.5f;
+	light[0].diffuse_color[0] = 0.7f; light[0].diffuse_color[1] = 0.7f;
+	light[0].diffuse_color[2] = 0.8f; light[0].diffuse_color[3] = 1.5f;
 
 	light[0].specular_color[0] = 0.8f; light[0].specular_color[1] = 0.8f;
 	light[0].specular_color[2] = 0.8f; light[0].specular_color[3] = 1.0f;
@@ -213,6 +213,8 @@ void prepare_scene(void) {
 	prepare_bike();
 	prepare_spider();
 	prepare_ben();
+	bus.prepare();
+	bike.prepare();
 	set_up_scene_lights();
 }
 

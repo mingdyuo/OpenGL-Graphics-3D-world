@@ -57,12 +57,14 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>C:\usr\local\OpenGL\include</AdditionalIncludeDirectories>
+      <ProgramDataBaseFileName>$(TEMP)vc$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>glew32.lib;FreeImage.lib;freeglut.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\usr\local\OpenGL\lib\x86</AdditionalLibraryDirectories>
+      <ProgramDatabaseFile>$(TEMP)$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -74,12 +76,14 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ProgramDataBaseFileName>$(TEMP)vc$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <ProgramDatabaseFile>$(TEMP)$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -87,6 +91,8 @@
     <ClCompile Include="dynamic_objects.cpp" />
     <ClCompile Include="file_reading_function.cpp" />
     <ClCompile Include="initialize.cpp" />
+    <ClCompile Include="keyboard.cpp" />
+    <ClCompile Include="Object.cpp" />
     <ClCompile Include="static_object.cpp" />
     <ClCompile Include="floor.cpp" />
     <ClCompile Include="Shaders\LoadShaders.cpp" />
@@ -95,10 +101,12 @@
   <ItemGroup>
     <ClInclude Include="axis.h" />
     <ClInclude Include="dynamic_objects.h" />
+    <ClInclude Include="file_reading_function.h" />
     <ClInclude Include="floor.h" />
     <ClInclude Include="initialize.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="My_Shading.h" />
+    <ClInclude Include="Object.h" />
     <ClInclude Include="Shaders\LoadShaders.h" />
     <ClInclude Include="static_objects.h" />
   </ItemGroup>
