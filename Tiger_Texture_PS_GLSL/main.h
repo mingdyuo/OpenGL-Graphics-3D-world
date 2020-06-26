@@ -3,6 +3,7 @@
 #include "floor.h"
 #include "axis.h"
 #include "static_objects.h"
+#include <vector>
 #include <glm/gtc/matrix_transform.hpp> //translate, rotate, scale, lookAt, perspective, etc.
 #include <glm/gtc/matrix_inverse.hpp> // inverseTranspose, etc.
 
@@ -26,3 +27,4 @@
 
 void timer_scene(int value);
 void keyboard(unsigned char key, int x, int y);
+//void init_objects();

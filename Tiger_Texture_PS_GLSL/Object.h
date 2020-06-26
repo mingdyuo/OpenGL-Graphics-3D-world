@@ -29,27 +29,61 @@ extern GLuint texture_names[N_TEXTURES_USED];
 extern int flag_texture_mapping;
 extern loc_Material_Parameters loc_material;
 
+extern GLint loc_ModelViewProjectionMatrix_TXPS, loc_ModelViewMatrix_TXPS, loc_ModelViewMatrixInvTrans_TXPS;
+extern glm::mat4 ModelViewProjectionMatrix, ModelViewMatrix;
+extern glm::mat3 ModelViewMatrixInvTrans;
+extern glm::mat4 ViewMatrix, ProjectionMatrix;
+
+void My_glTexImage2D_from_file(char* filename);
+int read_geometry(GLfloat** object, int bytes_per_primitive, char* filename);
+
 enum OBJ_TYPE {
 	OBJ_BUS,
-	OBJ_BIKE
+	OBJ_BIKE,
+	OBJ_IRONMAN,
+	OBJ_WOLF,
+	OBJ_BEN,
+	OBJ_SPIDER
+
 };
 
 class Object {
 private:
+public:
 	GLuint obj_VBO, obj_VAO;
 	int obj_n_triangles;
 	GLfloat* obj_vertices;
 	std::string obj_filename;
 	Material_Parameters material_obj;
 	OBJ_TYPE obj_type;
-public:
-	Object(std::string filename, OBJ_TYPE type);
+
+	Object(OBJ_TYPE type);
+	glm::vec3 position;
+	glm::vec3 scale;
+	glm::vec3 model_rotate_axis;
+	glm::vec3 world_rotate_axis;
+	float model_rotate_angle;
+	float world_rotate_angle;
+
+
 	void draw();
 	void prepare();
 	void set_material();
-
+	
 
 };
 
 void color_bus(Material_Parameters& material_obj);
 void color_bike(Material_Parameters& material_obj);
+void color_ironman(Material_Parameters& material_obj);
+
+//class Dynamic_Obj : public Object {
+//public:
+//	int obj_n_triangles;
+//	GLfloat* obj_vertices;
+//
+//	int* obj_cur_frame;
+//	void draw();
+//	Dynamic_Obj(OBJ_TYPE type, int* cur_frame);
+//
+//};

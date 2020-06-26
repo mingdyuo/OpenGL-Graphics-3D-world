@@ -44,9 +44,11 @@ int rotation_angle = 0;
 
 // callbacks
 float PRP_distance_scale[6] = { 0.5f, 1.0f, 2.5f, 5.0f, 10.0f, 20.0f };
-
-Object bus("Data/static_objects/bus_vnt.geom", OBJ_BUS);
-Object bike("Data/static_objects/bike_vnt.geom", OBJ_BIKE);
+float PRP = 0.5f;
+std::vector<Object*> objects;
+Object bus(OBJ_BUS);
+Object bike(OBJ_BIKE);
+Object ironman(OBJ_IRONMAN);
 
 void display(void) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -96,7 +98,8 @@ void display(void) {
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix_simple, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 	bus.draw();*/
 
-	bus.set_material();
+	/*bike.set_material();
+	bike.draw();
 	ModelViewMatrix = glm::translate(ViewMatrix, glm::vec3(100.0f, 0.0f, 80.0f));
 	ModelViewMatrix = glm::scale(ModelViewMatrix, glm::vec3(10.0f, 10.0f, 10.0f));
 	ModelViewProjectionMatrix = ProjectionMatrix * ModelViewMatrix;
@@ -105,8 +108,44 @@ void display(void) {
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix_TXPS, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 	glUniformMatrix4fv(loc_ModelViewMatrix_TXPS, 1, GL_FALSE, &ModelViewMatrix[0][0]);
 	glUniformMatrix3fv(loc_ModelViewMatrixInvTrans_TXPS, 1, GL_FALSE, &ModelViewMatrixInvTrans[0][0]);
+	bus.draw();*/
+	
+	bus.set_material();
+	bus.position = glm::vec3(-395.0f, 0.0f, 135.0f);
+	bus.scale = glm::vec3(3.0f, 3.0f, 3.0f);
+	bus.model_rotate_angle = 90.0f;
+	bus.model_rotate_axis = glm::vec3(0.0f, 1.0f, 0.0f);
+	for (int i = 0, y = 0; i < 5; i++, y += 20) {
+		bus.position[1] = float(y);
+		bus.position[2] = 135.0f;
+		bus.draw();
+		bus.position[2] = -135.0f;
+		bus.draw();
+	}
+	for (int z = -135; z <= 135; z += 20) {
+		bus.position[2] = float(z);
+		bus.draw();
+	}
+	 
+
+	ironman.set_material();
+	ironman.scale = glm::vec3(10.0f, 10.0f, 10.0f);
+	ironman.position = glm::vec3(10.0f, 100.0f, 10.0f);
+	ironman.model_rotate_angle = 90.0f;
+	ironman.model_rotate_axis = glm::vec3(0.0f, 1.0f, 0.0f);
+	ironman.draw();
+	
+	/*ModelViewMatrix = glm::translate(ViewMatrix, glm::vec3(100.0f, 0.0f, 80.0f));
+	ModelViewMatrix = glm::scale(ModelViewMatrix, glm::vec3(10.0f, 10.0f, 10.0f));
+	ModelViewProjectionMatrix = ProjectionMatrix * ModelViewMatrix;
+	ModelViewMatrixInvTrans = glm::inverseTranspose(glm::mat3(ModelViewMatrix));
+
+	glUniformMatrix4fv(loc_ModelViewProjectionMatrix_TXPS, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
+	glUniformMatrix4fv(loc_ModelViewMatrix_TXPS, 1, GL_FALSE, &ModelViewMatrix[0][0]);
+	glUniformMatrix3fv(loc_ModelViewMatrixInvTrans_TXPS, 1, GL_FALSE, &ModelViewMatrixInvTrans[0][0]);*/
 	//bus.draw();
-	bike.draw();
+	//bike.draw();
+
 /*
 	set_material_ben();
 	glUniform1i(loc_texture, TEXTURE_ID_BEN);
@@ -184,11 +223,17 @@ void greetings(char *program_name, char messages[][256], int n_message_lines) {
 	initialize_glew();
 }
 
+//void init_objects() {
+//	objects.push_back(&bus);
+//	objects.push_back(&ironman);
+//	objects.push_back(&bike);
+//}
 #define N_MESSAGE_LINES 1
 void main(int argc, char *argv[]) {
 	char program_name[64] = "Sogang CSE4170 5.4.Tiger_Texture_PS_GLSL";
 	char messages[N_MESSAGE_LINES][256] = { "    - Keys used: '0', '1', 'a', 't', 'f', 'c', 'p', 'd', 'y', 'u', 'i', 'o', 'ESC'"  };
 
+	//init_objects();
 	glutInit(&argc, argv);
   	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
 	glutInitWindowSize(800, 800);

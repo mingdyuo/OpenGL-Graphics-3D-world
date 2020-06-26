@@ -8,6 +8,7 @@
 #include "static_objects.h"
 #include "dynamic_objects.h"
 #include "Object.h"
+#include <vector>
 
 void prepare_shader_program(void);
 void initialize_flags(void);
@@ -23,3 +24,4 @@ void initialize_glew(void);
 
 extern Object bus;
 extern Object bike;
+extern Object ironman;

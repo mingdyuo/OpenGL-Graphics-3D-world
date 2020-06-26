@@ -29,6 +29,8 @@ extern float PRP_distance_scale[6];
 extern GLuint texture_names[N_TEXTURES_USED];
 extern int flag_texture_mapping;
 
+extern float PRP;
+
 void keyboard(unsigned char key, int x, int y) {
 	static int flag_cull_face = 0;
 	static int PRP_distance_level = 0;
@@ -113,35 +115,81 @@ void keyboard(unsigned char key, int x, int y) {
 		glutPostRedisplay();
 		break;
 	case 'i': // Change the tiger texture's magnification filter.
-		flag_tiger_mag_filter = (flag_tiger_mag_filter + 1) % 2;
-		//glActiveTexture(GL_TEXTURE0 + TEXTURE_ID_TIGER);
-		if (flag_tiger_mag_filter == 0) {
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			fprintf(stdout, "^^^ Mag filter for tiger: GL_NEAREST.\n");
-		}
-		else {
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			fprintf(stdout, "^^^ Mag filter for tiger: GL_LINEAR.\n");
-		}
+		PRP_distance_level = (PRP_distance_level + 1) % 6;
+		fprintf(stdout, "^^^ Distance level = %d.\n", PRP_distance_level);
+		
+		PRP -= 0.02f;
+		if (PRP < 0.4f) PRP = 0.4f;
+
+		ViewMatrix = glm::lookAt(PRP * glm::vec3(500.0f, 300.0f, 500.0f),
+			glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		/*ViewMatrix = glm::lookAt(PRP_distance_scale[PRP_distance_level] * glm::vec3(500.0f, 300.0f, 500.0f),
+			glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));*/
+
+		glUseProgram(h_ShaderProgram_TXPS);
+		// Must update the light 1's geometry in EC.
+		position_EC = ViewMatrix * glm::vec4(light[1].position[0], light[1].position[1],
+			light[1].position[2], light[1].position[3]);
+		glUniform4fv(loc_light[1].position, 1, &position_EC[0]);
+		direction_EC = glm::mat3(ViewMatrix) * glm::vec3(light[1].spot_direction[0],
+			light[1].spot_direction[1], light[1].spot_direction[2]);
+		glUniform3fv(loc_light[1].spot_direction, 1, &direction_EC[0]);
+		glUseProgram(0);
 		glutPostRedisplay();
 		break;
+
+		//flag_tiger_mag_filter = (flag_tiger_mag_filter + 1) % 2;
+		////glActiveTexture(GL_TEXTURE0 + TEXTURE_ID_TIGER);
+		//if (flag_tiger_mag_filter == 0) {
+		//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		//	fprintf(stdout, "^^^ Mag filter for tiger: GL_NEAREST.\n");
+		//}
+		//else {
+		//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		//	fprintf(stdout, "^^^ Mag filter for tiger: GL_LINEAR.\n");
+		//}
+		//glutPostRedisplay();
+		//break;
 	case 'o': // Change the tiger texture's minification filter.
-		flag_tiger_min_filter = (flag_tiger_min_filter + 1) % 3;
-		//glActiveTexture(GL_TEXTURE0 + TEXTURE_ID_TIGER);
-		if (flag_tiger_min_filter == 0) {
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			fprintf(stdout, "^^^ Min filter for tiger: GL_NEAREST.\n");
-		}
-		else if (flag_tiger_min_filter == 1) {
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			fprintf(stdout, "^^^ Min filter for tiger: GL_LINEAR.\n");
-		}
-		else {
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-			fprintf(stdout, "^^^ Min filter for tiger: GL_LINEAR_MIPMAP_LINEAR.\n");
-		}
+		PRP_distance_level = (PRP_distance_level + 1) % 6;
+		fprintf(stdout, "^^^ Distance level = %d.\n", PRP_distance_level);
+		
+		PRP += 0.02f;
+		if (PRP > 17.0f) PRP = 17.0f;
+
+		ViewMatrix = glm::lookAt(PRP * glm::vec3(500.0f, 300.0f, 500.0f),
+			glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		/*ViewMatrix = glm::lookAt(PRP_distance_scale[PRP_distance_level] * glm::vec3(500.0f, 300.0f, 500.0f),
+			glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));*/
+
+		glUseProgram(h_ShaderProgram_TXPS);
+		// Must update the light 1's geometry in EC.
+		position_EC = ViewMatrix * glm::vec4(light[1].position[0], light[1].position[1],
+			light[1].position[2], light[1].position[3]);
+		glUniform4fv(loc_light[1].position, 1, &position_EC[0]);
+		direction_EC = glm::mat3(ViewMatrix) * glm::vec3(light[1].spot_direction[0],
+			light[1].spot_direction[1], light[1].spot_direction[2]);
+		glUniform3fv(loc_light[1].spot_direction, 1, &direction_EC[0]);
+		glUseProgram(0);
 		glutPostRedisplay();
 		break;
+
+		//flag_tiger_min_filter = (flag_tiger_min_filter + 1) % 3;
+		////glActiveTexture(GL_TEXTURE0 + TEXTURE_ID_TIGER);
+		//if (flag_tiger_min_filter == 0) {
+		//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		//	fprintf(stdout, "^^^ Min filter for tiger: GL_NEAREST.\n");
+		//}
+		//else if (flag_tiger_min_filter == 1) {
+		//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		//	fprintf(stdout, "^^^ Min filter for tiger: GL_LINEAR.\n");
+		//}
+		//else {
+		//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		//	fprintf(stdout, "^^^ Min filter for tiger: GL_LINEAR_MIPMAP_LINEAR.\n");
+		//}
+		//glutPostRedisplay();
+		//break;
 	case 'c':
 		flag_cull_face = (flag_cull_face + 1) % 3;
 		switch (flag_cull_face) {
@@ -167,9 +215,14 @@ void keyboard(unsigned char key, int x, int y) {
 	case 'd':
 		PRP_distance_level = (PRP_distance_level + 1) % 6;
 		fprintf(stdout, "^^^ Distance level = %d.\n", PRP_distance_level);
+		PRP += 0.02f;
+		if (PRP > 17.0f) PRP = 17.0f;
+		else if (PRP < 0.2f) PRP = 0.2f;
 
-		ViewMatrix = glm::lookAt(PRP_distance_scale[PRP_distance_level] * glm::vec3(500.0f, 300.0f, 500.0f),
+		ViewMatrix = glm::lookAt(PRP * glm::vec3(500.0f, 300.0f, 500.0f),
 			glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		/*ViewMatrix = glm::lookAt(PRP_distance_scale[PRP_distance_level] * glm::vec3(500.0f, 300.0f, 500.0f),
+			glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));*/
 
 		glUseProgram(h_ShaderProgram_TXPS);
 		// Must update the light 1's geometry in EC.
