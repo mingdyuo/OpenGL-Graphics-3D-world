@@ -1,5 +1,6 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include "dynamic_objects.h"
+#include "externs.h"
 
 extern loc_Material_Parameters loc_material;
 

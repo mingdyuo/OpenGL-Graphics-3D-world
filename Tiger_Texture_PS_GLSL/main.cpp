@@ -22,7 +22,7 @@ GLint loc_texture, loc_flag_texture_mapping, loc_flag_fog;
 //#include <glm/gtc/matrix_inverse.hpp> // inverseTranspose, etc.
 glm::mat4 ModelViewProjectionMatrix, ModelViewMatrix;
 glm::mat3 ModelViewMatrixInvTrans;
-glm::mat4 ViewMatrix, ProjectionMatrix;
+glm::mat4 ViewMatrix, ProjectionMatrix, ViewProjectionMatrix;
 
 
 // lights in scene
@@ -31,6 +31,8 @@ Light_Parameters light[NUMBER_OF_LIGHT_SUPPORTED];
 // texture stuffs
 GLuint texture_names[N_TEXTURES_USED];
 int flag_texture_mapping;
+
+int flag_translation_axis;
 
 // fog stuffs
 // you could control the fog parameters interactively: FOG_COLOR, FOG_NEAR_DISTANCE, FOG_FAR_DISTANCE   
@@ -49,6 +51,12 @@ std::vector<Object*> objects;
 Object bus(OBJ_BUS);
 Object bike(OBJ_BIKE);
 Object ironman(OBJ_IRONMAN);
+
+Camera camera;
+glm::vec3 ironman_positions[] = {
+	glm::vec3(30.0f, 0.0f, -40.0f),
+	glm::vec3(-20.0f, 0.0f, -30.0f),
+};
 
 void display(void) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -75,6 +83,7 @@ void display(void) {
 	glUniformMatrix4fv(loc_ModelViewMatrix_TXPS, 1, GL_FALSE, &ModelViewMatrix[0][0]);
 	glUniformMatrix3fv(loc_ModelViewMatrixInvTrans_TXPS, 1, GL_FALSE, &ModelViewMatrixInvTrans[0][0]);
 	draw_floor();
+	glUseProgram(0);
 
 
 /*
@@ -98,18 +107,36 @@ void display(void) {
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix_simple, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 	bus.draw();*/
 
-	/*bike.set_material();
-	bike.draw();
+	glUseProgram(h_ShaderProgram_TXPS);
+	bike.set_material();
+	glUniform1i(loc_texture, TEXTURE_ID_FLOOR);
 	ModelViewMatrix = glm::translate(ViewMatrix, glm::vec3(100.0f, 0.0f, 80.0f));
 	ModelViewMatrix = glm::scale(ModelViewMatrix, glm::vec3(10.0f, 10.0f, 10.0f));
+	ModelViewMatrix = glm::rotate(ModelViewMatrix, -90.0f * TO_RADIAN, glm::vec3(1.0f, 0.0f, 0.0f));
 	ModelViewProjectionMatrix = ProjectionMatrix * ModelViewMatrix;
 	ModelViewMatrixInvTrans = glm::inverseTranspose(glm::mat3(ModelViewMatrix));
 
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix_TXPS, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 	glUniformMatrix4fv(loc_ModelViewMatrix_TXPS, 1, GL_FALSE, &ModelViewMatrix[0][0]);
 	glUniformMatrix3fv(loc_ModelViewMatrixInvTrans_TXPS, 1, GL_FALSE, &ModelViewMatrixInvTrans[0][0]);
-	bus.draw();*/
+	bike.draw();
+	glUseProgram(0);
+
+
 	
+	ironman.set_material();
+	ironman.scale = glm::vec3(13.0f, 13.0f, 13.0f);
+	ironman.model_rotate_angle = 90.0f;
+	for (auto pos : ironman_positions) {
+		ironman.position = pos;
+		ironman.draw();
+	}
+	
+	bike.set_material();
+	bike.scale = glm::vec3(13.0f, 13.0f, 13.0f);
+	bike.model_rotate_angle = -90.0f;
+	bike.draw();
+
 	bus.set_material();
 	bus.position = glm::vec3(-395.0f, 0.0f, 135.0f);
 	bus.scale = glm::vec3(3.0f, 3.0f, 3.0f);
@@ -128,12 +155,12 @@ void display(void) {
 	}
 	 
 
-	ironman.set_material();
+	/*ironman.set_material();
 	ironman.scale = glm::vec3(10.0f, 10.0f, 10.0f);
 	ironman.position = glm::vec3(10.0f, 100.0f, 10.0f);
 	ironman.model_rotate_angle = 90.0f;
 	ironman.model_rotate_axis = glm::vec3(0.0f, 1.0f, 0.0f);
-	ironman.draw();
+	ironman.draw();*/
 	
 	/*ModelViewMatrix = glm::translate(ViewMatrix, glm::vec3(100.0f, 0.0f, 80.0f));
 	ModelViewMatrix = glm::scale(ModelViewMatrix, glm::vec3(10.0f, 10.0f, 10.0f));
@@ -164,7 +191,7 @@ void display(void) {
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix_simple, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 	draw_axes();*/
 
-	glUseProgram(0);
+	//glUseProgram(0);
 
 	glutSwapBuffers();
 }
@@ -183,12 +210,15 @@ void timer_scene(int value) {
 
 
 void reshape(int width, int height) {
-	float aspect_ratio;
+	//float aspect_ratio;
 
 	glViewport(0, 0, width, height);
 	
-	aspect_ratio = (float) width / height;
-	ProjectionMatrix = glm::perspective(45.0f*TO_RADIAN, aspect_ratio, 100.0f, 20000.0f);
+	//aspect_ratio = (float) width / height;
+	camera.aspect_ratio = (float)width / height;
+	//ProjectionMatrix = glm::perspective(45.0f*TO_RADIAN, aspect_ratio, 100.0f, 20000.0f);
+	ProjectionMatrix = glm::perspective(camera.fovy * TO_RADIAN, camera.aspect_ratio, camera.near_c, camera.far_c);
+	ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
 
 	glutPostRedisplay();
 }
@@ -232,7 +262,7 @@ void greetings(char *program_name, char messages[][256], int n_message_lines) {
 void main(int argc, char *argv[]) {
 	char program_name[64] = "Sogang CSE4170 5.4.Tiger_Texture_PS_GLSL";
 	char messages[N_MESSAGE_LINES][256] = { "    - Keys used: '0', '1', 'a', 't', 'f', 'c', 'p', 'd', 'y', 'u', 'i', 'o', 'ESC'"  };
-
+	
 	//init_objects();
 	glutInit(&argc, argv);
   	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);

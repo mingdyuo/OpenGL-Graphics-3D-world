@@ -1,41 +1,16 @@
 #define _CRT_SECURE_NO_WARNINGS
 
-#include "main.h"
+#include "externs.h"
+#include "camera.h"
 
-extern GLint loc_global_ambient_color;
-extern loc_Material_Parameters loc_material;
-extern GLint loc_ModelViewProjectionMatrix_TXPS, loc_ModelViewMatrix_TXPS, loc_ModelViewMatrixInvTrans_TXPS;
-extern GLint loc_texture, loc_flag_texture_mapping, loc_flag_fog;
-
-extern loc_light_Parameters loc_light[NUMBER_OF_LIGHT_SUPPORTED];
-extern Light_Parameters light[NUMBER_OF_LIGHT_SUPPORTED];
-
-extern int flag_fog;
-
-// for tiger animation
-extern unsigned int timestamp_scene; // the global clock in the scene
-extern int flag_tiger_animation, flag_polygon_fill;
-extern int cur_frame_spider, cur_frame_ben, cur_frame_wolf;
-extern int rotation_angle;
-
-extern GLuint h_ShaderProgram_simple, h_ShaderProgram_TXPS; // handles to shader programs
-
-extern glm::mat4 ModelViewProjectionMatrix, ModelViewMatrix;
-extern glm::mat3 ModelViewMatrixInvTrans;
-extern glm::mat4 ViewMatrix, ProjectionMatrix;
-
-extern float PRP_distance_scale[6];
-
-extern GLuint texture_names[N_TEXTURES_USED];
-extern int flag_texture_mapping;
-
-extern float PRP;
 
 void keyboard(unsigned char key, int x, int y) {
 	static int flag_cull_face = 0;
 	static int PRP_distance_level = 0;
 	static int flag_floor_mag_filter = 0, flag_floor_min_filter = 0;
 	static int flag_tiger_mag_filter = 0, flag_tiger_min_filter = 0;
+	static bool move_positive_direction = true;
+	static bool rotate_negative_direction = true;
 
 	glm::vec4 position_EC;
 	glm::vec3 direction_EC;
@@ -115,17 +90,17 @@ void keyboard(unsigned char key, int x, int y) {
 		glutPostRedisplay();
 		break;
 	case 'i': // Change the tiger texture's magnification filter.
-		PRP_distance_level = (PRP_distance_level + 1) % 6;
-		fprintf(stdout, "^^^ Distance level = %d.\n", PRP_distance_level);
-		
+
 		PRP -= 0.02f;
-		if (PRP < 0.4f) PRP = 0.4f;
-
-		ViewMatrix = glm::lookAt(PRP * glm::vec3(500.0f, 300.0f, 500.0f),
-			glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		/*ViewMatrix = glm::lookAt(PRP_distance_scale[PRP_distance_level] * glm::vec3(500.0f, 300.0f, 500.0f),
-			glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));*/
-
+		if (PRP < 0.3f) PRP = 0.3f;
+		{
+			glm::vec3 temp_pos = camera.pos;
+			/*if (PRP < 0.4f) PRP = 0.4f;*/
+			camera.pos *= PRP;
+			camera.set_ViewMatrix_from_camera_frame();
+			ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
+			camera.pos = temp_pos;
+		}
 		glUseProgram(h_ShaderProgram_TXPS);
 		// Must update the light 1's geometry in EC.
 		position_EC = ViewMatrix * glm::vec4(light[1].position[0], light[1].position[1],
@@ -151,15 +126,28 @@ void keyboard(unsigned char key, int x, int y) {
 		//glutPostRedisplay();
 		//break;
 	case 'o': // Change the tiger texture's minification filter.
-		PRP_distance_level = (PRP_distance_level + 1) % 6;
+
+		/*camera.fovy += 0.02f;
+		if (camera.fovy > 17.0f) camera.fovy = 17.0f;*/
+		PRP += 0.02f;
+
+		{
+			glm::vec3 temp_pos = camera.pos;
+			/*if (PRP < 0.4f) PRP = 0.4f;*/
+			camera.pos *= PRP;
+			camera.set_ViewMatrix_from_camera_frame();
+			ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
+			camera.pos = temp_pos;
+		}
+
+
+		/*PRP_distance_level = (PRP_distance_level + 1) % 6;
 		fprintf(stdout, "^^^ Distance level = %d.\n", PRP_distance_level);
-		
+
 		PRP += 0.02f;
 		if (PRP > 17.0f) PRP = 17.0f;
 
 		ViewMatrix = glm::lookAt(PRP * glm::vec3(500.0f, 300.0f, 500.0f),
-			glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		/*ViewMatrix = glm::lookAt(PRP_distance_scale[PRP_distance_level] * glm::vec3(500.0f, 300.0f, 500.0f),
 			glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));*/
 
 		glUseProgram(h_ShaderProgram_TXPS);
@@ -216,7 +204,7 @@ void keyboard(unsigned char key, int x, int y) {
 		PRP_distance_level = (PRP_distance_level + 1) % 6;
 		fprintf(stdout, "^^^ Distance level = %d.\n", PRP_distance_level);
 		PRP += 0.02f;
-		if (PRP > 17.0f) PRP = 17.0f;
+		if (PRP > 15.0f) PRP = 15.0f;
 		else if (PRP < 0.2f) PRP = 0.2f;
 
 		ViewMatrix = glm::lookAt(PRP * glm::vec3(500.0f, 300.0f, 500.0f),
@@ -241,6 +229,102 @@ void keyboard(unsigned char key, int x, int y) {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		else
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glutPostRedisplay();
+		break;
+	case 'm':
+		move_positive_direction = !move_positive_direction;
+		break;
+	case ',': // move toward u axis
+		if (move_positive_direction)
+			camera.pos += camera.uaxis;
+		else
+			camera.pos -= camera.uaxis;
+		camera.set_ViewMatrix_from_camera_frame();
+		ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
+		glUseProgram(h_ShaderProgram_TXPS);
+		// Must update the light 1's geometry in EC.
+		position_EC = ViewMatrix * glm::vec4(light[1].position[0], light[1].position[1],
+			light[1].position[2], light[1].position[3]);
+		glUniform4fv(loc_light[1].position, 1, &position_EC[0]);
+		direction_EC = glm::mat3(ViewMatrix) * glm::vec3(light[1].spot_direction[0],
+			light[1].spot_direction[1], light[1].spot_direction[2]);
+		glUniform3fv(loc_light[1].spot_direction, 1, &direction_EC[0]);
+		glUseProgram(0);
+		glutPostRedisplay();
+		break;
+	case '.': // move toward v axis
+		if (move_positive_direction)
+			camera.pos += camera.vaxis;
+		else
+			camera.pos -= camera.vaxis;
+		camera.set_ViewMatrix_from_camera_frame();
+		ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
+		glUseProgram(h_ShaderProgram_TXPS);
+		// Must update the light 1's geometry in EC.
+		position_EC = ViewMatrix * glm::vec4(light[1].position[0], light[1].position[1],
+			light[1].position[2], light[1].position[3]);
+		glUniform4fv(loc_light[1].position, 1, &position_EC[0]);
+		direction_EC = glm::mat3(ViewMatrix) * glm::vec3(light[1].spot_direction[0],
+			light[1].spot_direction[1], light[1].spot_direction[2]);
+		glUniform3fv(loc_light[1].spot_direction, 1, &direction_EC[0]);
+		glUseProgram(0);
+		glutPostRedisplay();
+		break;
+	case '/': // move toward n axis
+		if (move_positive_direction)
+			camera.pos += camera.naxis;
+		else
+			camera.pos -= camera.naxis;
+		camera.set_ViewMatrix_from_camera_frame();
+		ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
+		glUseProgram(h_ShaderProgram_TXPS);
+		// Must update the light 1's geometry in EC.
+		position_EC = ViewMatrix * glm::vec4(light[1].position[0], light[1].position[1],
+			light[1].position[2], light[1].position[3]);
+		glUniform4fv(loc_light[1].position, 1, &position_EC[0]);
+		direction_EC = glm::mat3(ViewMatrix) * glm::vec3(light[1].spot_direction[0],
+			light[1].spot_direction[1], light[1].spot_direction[2]);
+		glUniform3fv(loc_light[1].spot_direction, 1, &direction_EC[0]);
+		glUseProgram(0);
+		glutPostRedisplay();
+		break;
+	case 'k':
+		rotate_negative_direction = !rotate_negative_direction;
+		break;
+	case 'l': // rotate by uaxis
+		{
+			float angle = rotate_negative_direction ? -1.0f : 1.0f;
+			glm::vec4 temp = glm::rotate(glm::mat4(1.0f), angle * TO_RADIAN, camera.uaxis) * glm::vec4(camera.naxis, 1.0f);
+			camera.naxis = glm::vec3(temp[0], temp[1], temp[2]);
+			temp = glm::rotate(glm::mat4(1.0f), angle * TO_RADIAN, camera.uaxis) * glm::vec4(camera.vaxis, 1.0f);
+			camera.vaxis = glm::vec3(temp[0], temp[1], temp[2]);
+		}
+		camera.set_ViewMatrix_from_camera_frame();
+		ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
+		glutPostRedisplay();
+		break;
+	case ';': // rotate by vaxis
+		{
+			float angle = rotate_negative_direction ? -1.0f : 1.0f;
+			glm::vec4 temp = glm::rotate(glm::mat4(1.0f), angle * TO_RADIAN, camera.vaxis) * glm::vec4(camera.naxis, 1.0f);
+			camera.naxis = glm::vec3(temp[0], temp[1], temp[2]);
+			temp = glm::rotate(glm::mat4(1.0f), angle * TO_RADIAN, camera.vaxis) * glm::vec4(camera.uaxis, 1.0f);
+			camera.uaxis = glm::vec3(temp[0], temp[1], temp[2]);
+		}
+		camera.set_ViewMatrix_from_camera_frame();
+		ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
+		glutPostRedisplay();
+		break;
+	case '\'': // rotate by naxis
+		{
+			float angle = rotate_negative_direction ? -1.0f : 1.0f;
+			glm::vec4 temp = glm::rotate(glm::mat4(1.0f), angle * TO_RADIAN, camera.naxis) * glm::vec4(camera.vaxis, 1.0f);
+			camera.vaxis = glm::vec3(temp[0], temp[1], temp[2]);
+			temp = glm::rotate(glm::mat4(1.0f), angle * TO_RADIAN, camera.naxis) * glm::vec4(camera.uaxis, 1.0f);
+			camera.uaxis = glm::vec3(temp[0], temp[1], temp[2]);
+		}
+		camera.set_ViewMatrix_from_camera_frame();
+		ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
 		glutPostRedisplay();
 		break;
 	case 27: // ESC key

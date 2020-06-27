@@ -8,6 +8,7 @@
 #include "static_objects.h"
 #include "dynamic_objects.h"
 #include "Object.h"
+#include "camera.h"
 #include <vector>
 
 void prepare_shader_program(void);

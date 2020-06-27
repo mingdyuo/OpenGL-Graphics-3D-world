@@ -88,6 +88,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="axis.cpp" />
+    <ClCompile Include="camera.cpp" />
     <ClCompile Include="dynamic_objects.cpp" />
     <ClCompile Include="file_reading_function.cpp" />
     <ClCompile Include="initialize.cpp" />
@@ -103,7 +104,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="axis.h" />
+    <ClInclude Include="camera.h" />
     <ClInclude Include="dynamic_objects.h" />
+    <ClInclude Include="externs.h" />
     <ClInclude Include="file_reading_function.h" />
     <ClInclude Include="floor.h" />
     <ClInclude Include="initialize.h" />

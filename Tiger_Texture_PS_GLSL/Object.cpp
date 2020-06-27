@@ -1,5 +1,6 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include "Object.h"
+#include "externs.h"
 
 
 
@@ -82,13 +83,18 @@ void Object::prepare() {
 	
 }
 
+
+
 void Object::draw() {
+	glUseProgram(h_ShaderProgram_TXPS);
+	set_material();
 	ModelViewMatrix = glm::rotate(ViewMatrix, world_rotate_angle * TO_RADIAN, world_rotate_axis);
 	ModelViewMatrix = glm::translate(ModelViewMatrix, position);
 	ModelViewMatrix = glm::rotate(ModelViewMatrix, model_rotate_angle * TO_RADIAN, model_rotate_axis);
 	ModelViewMatrix = glm::scale(ModelViewMatrix, scale);
 	ModelViewProjectionMatrix = ProjectionMatrix * ModelViewMatrix;
 	ModelViewMatrixInvTrans = glm::inverseTranspose(glm::mat3(ModelViewMatrix));
+
 
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix_TXPS, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 	glUniformMatrix4fv(loc_ModelViewMatrix_TXPS, 1, GL_FALSE, &ModelViewMatrix[0][0]);
@@ -99,6 +105,7 @@ void Object::draw() {
 	glBindVertexArray(obj_VAO);
 	glDrawArrays(GL_TRIANGLES, 0, 3 * obj_n_triangles);
 	glBindVertexArray(0);
+	glUseProgram(0);
 }
 //
 //Dynamic_Obj::Dynamic_Obj(OBJ_TYPE type, int* cur_frame) {

@@ -89,6 +89,7 @@ void initialize_flags(void) {
 	flag_polygon_fill = 1;
 	flag_texture_mapping = 1;
 	flag_fog = 0;
+	flag_translation_axis = Z_AXIS;
 
 	glUseProgram(h_ShaderProgram_TXPS);
 	glUniform1i(loc_flag_fog, flag_fog);
@@ -101,8 +102,13 @@ void initialize_OpenGL(void) {
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-	ViewMatrix = glm::lookAt(PRP_distance_scale[0] * glm::vec3(500.0f, 300.0f, 500.0f),
-		glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	ViewMatrix = glm::mat4(1.0f);
+	ProjectionMatrix = glm::mat4(1.0f);
+	ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
+
+	//flag_translation_axis = Z_AXIS;
+	/*ViewMatrix = glm::lookAt(PRP_distance_scale[0] * glm::vec3(500.0f, 300.0f, 500.0f),
+		glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));*/
 	initialize_lights_and_material();
 	initialize_flags();
 
@@ -217,6 +223,7 @@ void prepare_scene(void) {
 	ironman.prepare();
 	bike.prepare();
 	set_up_scene_lights();
+	camera.initialize();
 }
 
 void initialize_renderer(void) {
@@ -224,6 +231,7 @@ void initialize_renderer(void) {
 	prepare_shader_program();
 	initialize_OpenGL();
 	prepare_scene();
+	//initialize_camera();
 }
 
 
