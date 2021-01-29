@@ -20,11 +20,16 @@
 #define LOC_TEXCOORD 2
 
 // texture stuffs
-#define N_TEXTURES_USED 4
+#define N_TEXTURES_USED 9
 #define TEXTURE_ID_FLOOR 0
+#define TEXTURE_ID_FLOOR2 7
 #define TEXTURE_ID_WOLF 1
 #define TEXTURE_ID_SPIDER 2
 #define TEXTURE_ID_BEN 3
+#define TEXTURE_ID_BUS 4
+#define TEXTURE_ID_IRONMAN 5
+#define TEXTURE_ID_IRONMAN2 8
+#define TEXTURE_ID_BIKE 6
 extern GLuint texture_names[N_TEXTURES_USED];
 extern int flag_texture_mapping;
 extern loc_Material_Parameters loc_material;
@@ -56,8 +61,14 @@ public:
 	std::string obj_filename;
 	Material_Parameters material_obj;
 	OBJ_TYPE obj_type;
+	float velocity;
+	int texture_id;
+	char* texture_filename;
+	int texture_id2;
+	char* texture_filename2;
 
 	Object(OBJ_TYPE type);
+	glm::vec3 direction;
 	glm::vec3 position;
 	glm::vec3 scale;
 	glm::vec3 model_rotate_axis;
@@ -65,25 +76,28 @@ public:
 	float model_rotate_angle;
 	float world_rotate_angle;
 
-
 	void draw();
 	void prepare();
 	void set_material();
-	
-
 };
 
 void color_bus(Material_Parameters& material_obj);
 void color_bike(Material_Parameters& material_obj);
 void color_ironman(Material_Parameters& material_obj);
+void color_ben(Material_Parameters& material_obj);
+void color_wolf(Material_Parameters& material_obj);
+void color_spider(Material_Parameters& material_obj);
 
-//class Dynamic_Obj : public Object {
-//public:
-//	int obj_n_triangles;
-//	GLfloat* obj_vertices;
-//
-//	int* obj_cur_frame;
-//	void draw();
-//	Dynamic_Obj(OBJ_TYPE type, int* cur_frame);
-//
-//};
+class Dynamic_Obj : public Object {
+public:
+	int* obj_n_triangles;
+	int* obj_vertex_offset;
+	GLfloat** obj_vertices;
+	int n_frames;
+	int* obj_cur_frame;
+
+	Dynamic_Obj::Dynamic_Obj(OBJ_TYPE type);
+	Dynamic_Obj::~Dynamic_Obj();
+	void prepare();
+	void draw();
+};

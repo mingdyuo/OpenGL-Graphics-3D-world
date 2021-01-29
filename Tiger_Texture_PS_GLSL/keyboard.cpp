@@ -3,7 +3,8 @@
 #include "externs.h"
 #include "camera.h"
 
-
+extern bool zoom_inout;
+extern bool addition;
 void keyboard(unsigned char key, int x, int y) {
 	static int flag_cull_face = 0;
 	static int PRP_distance_level = 0;
@@ -11,6 +12,7 @@ void keyboard(unsigned char key, int x, int y) {
 	static int flag_tiger_mag_filter = 0, flag_tiger_min_filter = 0;
 	static bool move_positive_direction = true;
 	static bool rotate_negative_direction = true;
+	static float camera_move_rate = 2.0f;
 
 	glm::vec4 position_EC;
 	glm::vec3 direction_EC;
@@ -28,6 +30,15 @@ void keyboard(unsigned char key, int x, int y) {
 	}
 
 	switch (key) {
+	case 'r':
+		addition = !addition;
+		break;
+	case 'q':
+
+
+
+
+		break;
 	case 'a': // toggle the animation effect.
 		flag_tiger_animation = 1 - flag_tiger_animation;
 		if (flag_tiger_animation) {
@@ -49,13 +60,13 @@ void keyboard(unsigned char key, int x, int y) {
 		glutPostRedisplay();
 		break;
 	case 't':
-		flag_texture_mapping = 1 - flag_texture_mapping;
+		flag_texture_mapping = (1 + flag_texture_mapping)%3;
 		if (flag_texture_mapping)
 			fprintf(stdout, "^^^ Texture mapping ON.\n");
 		else
 			fprintf(stdout, "^^^ Texture mapping OFF.\n");
 		glUseProgram(h_ShaderProgram_TXPS);
-		glUniform1i(loc_flag_texture_mapping, flag_texture_mapping);
+		glUniform1i(loc_flag_texture_mapping, flag_texture_mapping>0?1:0);
 		glUseProgram(0);
 		glutPostRedisplay();
 		break;
@@ -91,16 +102,15 @@ void keyboard(unsigned char key, int x, int y) {
 		break;
 	case 'i': // Change the tiger texture's magnification filter.
 
-		PRP -= 0.02f;
-		if (PRP < 0.3f) PRP = 0.3f;
-		{
-			glm::vec3 temp_pos = camera.pos;
-			/*if (PRP < 0.4f) PRP = 0.4f;*/
-			camera.pos *= PRP;
-			camera.set_ViewMatrix_from_camera_frame();
-			ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
-			camera.pos = temp_pos;
-		}
+		camera.fovy -= 3.0f;
+		if (camera.fovy < 5.0f) camera.fovy = 5.0f;
+		ProjectionMatrix = glm::perspective(camera.fovy * TO_RADIAN, camera.aspect_ratio, camera.near_c, camera.far_c);
+		ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
+
+		light[2].spot_direction[0] = -camera.naxis[0]; light[2].spot_direction[1] = -camera.naxis[1];// spot light direction in WC
+		light[2].spot_direction[2] = -camera.naxis[2];
+
+
 		glUseProgram(h_ShaderProgram_TXPS);
 		// Must update the light 1's geometry in EC.
 		position_EC = ViewMatrix * glm::vec4(light[1].position[0], light[1].position[1],
@@ -111,44 +121,18 @@ void keyboard(unsigned char key, int x, int y) {
 		glUniform3fv(loc_light[1].spot_direction, 1, &direction_EC[0]);
 		glUseProgram(0);
 		glutPostRedisplay();
+		//zoom_inout = false;
 		break;
 
-		//flag_tiger_mag_filter = (flag_tiger_mag_filter + 1) % 2;
-		////glActiveTexture(GL_TEXTURE0 + TEXTURE_ID_TIGER);
-		//if (flag_tiger_mag_filter == 0) {
-		//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		//	fprintf(stdout, "^^^ Mag filter for tiger: GL_NEAREST.\n");
-		//}
-		//else {
-		//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		//	fprintf(stdout, "^^^ Mag filter for tiger: GL_LINEAR.\n");
-		//}
-		//glutPostRedisplay();
-		//break;
 	case 'o': // Change the tiger texture's minification filter.
 
-		/*camera.fovy += 0.02f;
-		if (camera.fovy > 17.0f) camera.fovy = 17.0f;*/
-		PRP += 0.02f;
+		camera.fovy += 3.0f;
+		if (camera.fovy > 100.0f) camera.fovy = 100.0f;
+		ProjectionMatrix = glm::perspective(camera.fovy * TO_RADIAN, camera.aspect_ratio, camera.near_c, camera.far_c);
+		ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
 
-		{
-			glm::vec3 temp_pos = camera.pos;
-			/*if (PRP < 0.4f) PRP = 0.4f;*/
-			camera.pos *= PRP;
-			camera.set_ViewMatrix_from_camera_frame();
-			ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
-			camera.pos = temp_pos;
-		}
-
-
-		/*PRP_distance_level = (PRP_distance_level + 1) % 6;
-		fprintf(stdout, "^^^ Distance level = %d.\n", PRP_distance_level);
-
-		PRP += 0.02f;
-		if (PRP > 17.0f) PRP = 17.0f;
-
-		ViewMatrix = glm::lookAt(PRP * glm::vec3(500.0f, 300.0f, 500.0f),
-			glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));*/
+		light[2].spot_direction[0] = -camera.naxis[0]; light[2].spot_direction[1] = -camera.naxis[1];// spot light direction in WC
+		light[2].spot_direction[2] = -camera.naxis[2];
 
 		glUseProgram(h_ShaderProgram_TXPS);
 		// Must update the light 1's geometry in EC.
@@ -160,24 +144,10 @@ void keyboard(unsigned char key, int x, int y) {
 		glUniform3fv(loc_light[1].spot_direction, 1, &direction_EC[0]);
 		glUseProgram(0);
 		glutPostRedisplay();
+		//zoom_inout = false;
 		break;
 
-		//flag_tiger_min_filter = (flag_tiger_min_filter + 1) % 3;
-		////glActiveTexture(GL_TEXTURE0 + TEXTURE_ID_TIGER);
-		//if (flag_tiger_min_filter == 0) {
-		//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		//	fprintf(stdout, "^^^ Min filter for tiger: GL_NEAREST.\n");
-		//}
-		//else if (flag_tiger_min_filter == 1) {
-		//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		//	fprintf(stdout, "^^^ Min filter for tiger: GL_LINEAR.\n");
-		//}
-		//else {
-		//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		//	fprintf(stdout, "^^^ Min filter for tiger: GL_LINEAR_MIPMAP_LINEAR.\n");
-		//}
-		//glutPostRedisplay();
-		//break;
+
 	case 'c':
 		flag_cull_face = (flag_cull_face + 1) % 3;
 		switch (flag_cull_face) {
@@ -200,29 +170,32 @@ void keyboard(unsigned char key, int x, int y) {
 			break;
 		}
 		break;
-	case 'd':
-		PRP_distance_level = (PRP_distance_level + 1) % 6;
-		fprintf(stdout, "^^^ Distance level = %d.\n", PRP_distance_level);
-		PRP += 0.02f;
-		if (PRP > 15.0f) PRP = 15.0f;
-		else if (PRP < 0.2f) PRP = 0.2f;
+	//case 'd':
+	//	PRP_distance_level = (PRP_distance_level + 1) % 6;
+	//	fprintf(stdout, "^^^ Distance level = %d.\n", PRP_distance_level);
+	//	PRP += 0.02f;
+	//	if (PRP > 15.0f) PRP = 15.0f;
+	//	else if (PRP < 0.2f) PRP = 0.2f;
 
-		ViewMatrix = glm::lookAt(PRP * glm::vec3(500.0f, 300.0f, 500.0f),
-			glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		/*ViewMatrix = glm::lookAt(PRP_distance_scale[PRP_distance_level] * glm::vec3(500.0f, 300.0f, 500.0f),
-			glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));*/
+	//	ViewMatrix = glm::lookAt(PRP * glm::vec3(500.0f, 300.0f, 500.0f),
+	//		glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	//	/*ViewMatrix = glm::lookAt(PRP_distance_scale[PRP_distance_level] * glm::vec3(500.0f, 300.0f, 500.0f),
+	//		glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));*/
+	//	light[2].spot_direction[0] = -camera.naxis[0]; light[2].spot_direction[1] = -camera.naxis[1];// spot light direction in WC
+	//	light[2].spot_direction[2] = -camera.naxis[2];
 
-		glUseProgram(h_ShaderProgram_TXPS);
-		// Must update the light 1's geometry in EC.
-		position_EC = ViewMatrix * glm::vec4(light[1].position[0], light[1].position[1],
-			light[1].position[2], light[1].position[3]);
-		glUniform4fv(loc_light[1].position, 1, &position_EC[0]);
-		direction_EC = glm::mat3(ViewMatrix) * glm::vec3(light[1].spot_direction[0],
-			light[1].spot_direction[1], light[1].spot_direction[2]);
-		glUniform3fv(loc_light[1].spot_direction, 1, &direction_EC[0]);
-		glUseProgram(0);
-		glutPostRedisplay();
-		break;
+
+	//	glUseProgram(h_ShaderProgram_TXPS);
+	//	// Must update the light 1's geometry in EC.
+	//	position_EC = ViewMatrix * glm::vec4(light[1].position[0], light[1].position[1],
+	//		light[1].position[2], light[1].position[3]);
+	//	glUniform4fv(loc_light[1].position, 1, &position_EC[0]);
+	//	direction_EC = glm::mat3(ViewMatrix) * glm::vec3(light[1].spot_direction[0],
+	//		light[1].spot_direction[1], light[1].spot_direction[2]);
+	//	glUniform3fv(loc_light[1].spot_direction, 1, &direction_EC[0]);
+	//	glUseProgram(0);
+	//	glutPostRedisplay();
+	//	break;
 	case 'p':
 		flag_polygon_fill = 1 - flag_polygon_fill;
 		if (flag_polygon_fill)
@@ -236,11 +209,18 @@ void keyboard(unsigned char key, int x, int y) {
 		break;
 	case ',': // move toward u axis
 		if (move_positive_direction)
-			camera.pos += camera.uaxis;
+			camera.pos += camera.uaxis * camera_move_rate;
 		else
-			camera.pos -= camera.uaxis;
+			camera.pos -= camera.uaxis * camera_move_rate;
 		camera.set_ViewMatrix_from_camera_frame();
 		ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
+
+		light[2].position[0] = camera.pos[0]; light[2].position[1] = camera.pos[1]; // spot light position in WC
+		light[2].position[2] = camera.pos[2]; light[2].position[3] = 1.0f;
+		light[2].spot_direction[0] = -camera.naxis[0]; light[2].spot_direction[1] = -camera.naxis[1];// spot light direction in WC
+		light[2].spot_direction[2] = -camera.naxis[2];
+
+
 		glUseProgram(h_ShaderProgram_TXPS);
 		// Must update the light 1's geometry in EC.
 		position_EC = ViewMatrix * glm::vec4(light[1].position[0], light[1].position[1],
@@ -249,16 +229,30 @@ void keyboard(unsigned char key, int x, int y) {
 		direction_EC = glm::mat3(ViewMatrix) * glm::vec3(light[1].spot_direction[0],
 			light[1].spot_direction[1], light[1].spot_direction[2]);
 		glUniform3fv(loc_light[1].spot_direction, 1, &direction_EC[0]);
+
+		position_EC =  glm::vec4(light[2].position[0], light[2].position[1],
+			light[2].position[2], light[2].position[3]);
+		glUniform4fv(loc_light[2].position, 1, &position_EC[0]);
+		direction_EC = glm::vec3(light[2].spot_direction[0],
+			light[2].spot_direction[1], light[2].spot_direction[2]);
+		glUniform3fv(loc_light[2].spot_direction, 1, &direction_EC[0]);
+
 		glUseProgram(0);
 		glutPostRedisplay();
 		break;
 	case '.': // move toward v axis
 		if (move_positive_direction)
-			camera.pos += camera.vaxis;
+			camera.pos += camera.vaxis * camera_move_rate;
 		else
-			camera.pos -= camera.vaxis;
+			camera.pos -= camera.vaxis * camera_move_rate;
 		camera.set_ViewMatrix_from_camera_frame();
 		ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
+
+		light[2].position[0] = camera.pos[0]; light[2].position[1] = camera.pos[1]; // spot light position in WC
+		light[2].position[2] = camera.pos[2]; light[2].position[3] = 1.0f;
+		light[2].spot_direction[0] = -camera.naxis[0]; light[2].spot_direction[1] = -camera.naxis[1];// spot light direction in WC
+		light[2].spot_direction[2] = -camera.naxis[2];
+
 		glUseProgram(h_ShaderProgram_TXPS);
 		// Must update the light 1's geometry in EC.
 		position_EC = ViewMatrix * glm::vec4(light[1].position[0], light[1].position[1],
@@ -267,16 +261,30 @@ void keyboard(unsigned char key, int x, int y) {
 		direction_EC = glm::mat3(ViewMatrix) * glm::vec3(light[1].spot_direction[0],
 			light[1].spot_direction[1], light[1].spot_direction[2]);
 		glUniform3fv(loc_light[1].spot_direction, 1, &direction_EC[0]);
+
+		position_EC = glm::vec4(light[2].position[0], light[2].position[1],
+			light[2].position[2], light[2].position[3]);
+		glUniform4fv(loc_light[2].position, 1, &position_EC[0]);
+		direction_EC = glm::vec3(light[2].spot_direction[0],
+			light[2].spot_direction[1], light[2].spot_direction[2]);
+		glUniform3fv(loc_light[2].spot_direction, 1, &direction_EC[0]);
+
 		glUseProgram(0);
 		glutPostRedisplay();
 		break;
 	case '/': // move toward n axis
 		if (move_positive_direction)
-			camera.pos += camera.naxis;
+			camera.pos += camera.naxis * camera_move_rate;
 		else
-			camera.pos -= camera.naxis;
+			camera.pos -= camera.naxis * camera_move_rate;
 		camera.set_ViewMatrix_from_camera_frame();
 		ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
+
+		light[2].position[0] = camera.pos[0]; light[2].position[1] = camera.pos[1]; // spot light position in WC
+		light[2].position[2] = camera.pos[2]; light[2].position[3] = 1.0f;
+		light[2].spot_direction[0] = -camera.naxis[0]; light[2].spot_direction[1] = -camera.naxis[1];// spot light direction in WC
+		light[2].spot_direction[2] = -camera.naxis[2];
+
 		glUseProgram(h_ShaderProgram_TXPS);
 		// Must update the light 1's geometry in EC.
 		position_EC = ViewMatrix * glm::vec4(light[1].position[0], light[1].position[1],
@@ -285,6 +293,14 @@ void keyboard(unsigned char key, int x, int y) {
 		direction_EC = glm::mat3(ViewMatrix) * glm::vec3(light[1].spot_direction[0],
 			light[1].spot_direction[1], light[1].spot_direction[2]);
 		glUniform3fv(loc_light[1].spot_direction, 1, &direction_EC[0]);
+
+		position_EC =glm::vec4(light[2].position[0], light[2].position[1],
+			light[2].position[2], light[2].position[3]);
+		glUniform4fv(loc_light[2].position, 1, &position_EC[0]);
+		direction_EC = glm::vec3(light[2].spot_direction[0],
+			light[2].spot_direction[1], light[2].spot_direction[2]);
+		glUniform3fv(loc_light[2].spot_direction, 1, &direction_EC[0]);
+
 		glUseProgram(0);
 		glutPostRedisplay();
 		break;
@@ -301,6 +317,29 @@ void keyboard(unsigned char key, int x, int y) {
 		}
 		camera.set_ViewMatrix_from_camera_frame();
 		ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
+
+		light[2].position[0] = camera.pos[0]; light[2].position[1] = camera.pos[1]; // spot light position in WC
+		light[2].position[2] = camera.pos[2]; light[2].position[3] = 1.0f;
+		light[2].spot_direction[0] = -camera.naxis[0]; light[2].spot_direction[1] = -camera.naxis[1];// spot light direction in WC
+		light[2].spot_direction[2] = -camera.naxis[2];
+
+		glUseProgram(h_ShaderProgram_TXPS);
+		// Must update the light 1's geometry in EC.
+		position_EC = ViewMatrix * glm::vec4(light[1].position[0], light[1].position[1],
+			light[1].position[2], light[1].position[3]);
+		glUniform4fv(loc_light[1].position, 1, &position_EC[0]);
+		direction_EC = glm::mat3(ViewMatrix) * glm::vec3(light[1].spot_direction[0],
+			light[1].spot_direction[1], light[1].spot_direction[2]);
+		glUniform3fv(loc_light[1].spot_direction, 1, &direction_EC[0]);
+
+		position_EC =  glm::vec4(light[2].position[0], light[2].position[1],
+			light[2].position[2], light[2].position[3]);
+		glUniform4fv(loc_light[2].position, 1, &position_EC[0]);
+		direction_EC =  glm::vec3(light[2].spot_direction[0],
+			light[2].spot_direction[1], light[2].spot_direction[2]);
+		glUniform3fv(loc_light[2].spot_direction, 1, &direction_EC[0]);
+
+		glUseProgram(0);
 		glutPostRedisplay();
 		break;
 	case ';': // rotate by vaxis
@@ -313,6 +352,29 @@ void keyboard(unsigned char key, int x, int y) {
 		}
 		camera.set_ViewMatrix_from_camera_frame();
 		ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
+
+		light[2].position[0] = camera.pos[0]; light[2].position[1] = camera.pos[1]; // spot light position in WC
+		light[2].position[2] = camera.pos[2]; light[2].position[3] = 1.0f;
+		light[2].spot_direction[0] = -camera.naxis[0]; light[2].spot_direction[1] = -camera.naxis[1];// spot light direction in WC
+		light[2].spot_direction[2] = -camera.naxis[2];
+
+		glUseProgram(h_ShaderProgram_TXPS);
+		// Must update the light 1's geometry in EC.
+		position_EC = ViewMatrix * glm::vec4(light[1].position[0], light[1].position[1],
+			light[1].position[2], light[1].position[3]);
+		glUniform4fv(loc_light[1].position, 1, &position_EC[0]);
+		direction_EC = glm::mat3(ViewMatrix) * glm::vec3(light[1].spot_direction[0],
+			light[1].spot_direction[1], light[1].spot_direction[2]);
+		glUniform3fv(loc_light[1].spot_direction, 1, &direction_EC[0]);
+
+		position_EC =  glm::vec4(light[2].position[0], light[2].position[1],
+			light[2].position[2], light[2].position[3]);
+		glUniform4fv(loc_light[2].position, 1, &position_EC[0]);
+		direction_EC = glm::vec3(light[2].spot_direction[0],
+			light[2].spot_direction[1], light[2].spot_direction[2]);
+		glUniform3fv(loc_light[2].spot_direction, 1, &direction_EC[0]);
+
+		glUseProgram(0);
 		glutPostRedisplay();
 		break;
 	case '\'': // rotate by naxis
@@ -325,6 +387,30 @@ void keyboard(unsigned char key, int x, int y) {
 		}
 		camera.set_ViewMatrix_from_camera_frame();
 		ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
+
+		light[2].position[0] = camera.pos[0]; light[2].position[1] = camera.pos[1]; // spot light position in WC
+		light[2].position[2] = camera.pos[2]; light[2].position[3] = 1.0f;
+		light[2].spot_direction[0] = -camera.naxis[0]; light[2].spot_direction[1] = -camera.naxis[1];// spot light direction in WC
+		light[2].spot_direction[2] = -camera.naxis[2];
+
+		glUseProgram(h_ShaderProgram_TXPS);
+		// Must update the light 1's geometry in EC.
+		position_EC = ViewMatrix * glm::vec4(light[1].position[0], light[1].position[1],
+			light[1].position[2], light[1].position[3]);
+		glUniform4fv(loc_light[1].position, 1, &position_EC[0]);
+		direction_EC = glm::mat3(ViewMatrix) * glm::vec3(light[1].spot_direction[0],
+			light[1].spot_direction[1], light[1].spot_direction[2]);
+		glUniform3fv(loc_light[1].spot_direction, 1, &direction_EC[0]);
+
+		position_EC = glm::vec4(light[2].position[0], light[2].position[1],
+			light[2].position[2], light[2].position[3]);
+		glUniform4fv(loc_light[2].position, 1, &position_EC[0]);
+		direction_EC = glm::vec3(light[2].spot_direction[0],
+			light[2].spot_direction[1], light[2].spot_direction[2]);
+		glUniform3fv(loc_light[2].spot_direction, 1, &direction_EC[0]);
+		glUseProgram(0);
+
+	
 		glutPostRedisplay();
 		break;
 	case 27: // ESC key

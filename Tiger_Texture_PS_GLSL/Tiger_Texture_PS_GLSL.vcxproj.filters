@@ -24,9 +24,6 @@
     <ClCompile Include="axis.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="static_object.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="file_reading_function.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -34,9 +31,6 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="initialize.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="dynamic_objects.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="keyboard.cpp">
@@ -62,16 +56,10 @@
     <ClInclude Include="axis.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="static_objects.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="main.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="initialize.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="dynamic_objects.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Object.h">

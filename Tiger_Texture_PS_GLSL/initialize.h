@@ -5,10 +5,9 @@
 
 #include "floor.h"
 #include "axis.h"
-#include "static_objects.h"
-#include "dynamic_objects.h"
 #include "Object.h"
 #include "camera.h"
+#include "externs.h"
 #include <vector>
 
 void prepare_shader_program(void);
@@ -26,3 +25,6 @@ void initialize_glew(void);
 extern Object bus;
 extern Object bike;
 extern Object ironman;
+extern Dynamic_Obj spider;
+extern Dynamic_Obj wolf;
+extern Dynamic_Obj ben;

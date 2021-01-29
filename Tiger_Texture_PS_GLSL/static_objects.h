@@ -18,11 +18,14 @@
 #define LOC_TEXCOORD 2
 
 // texture stuffs
-#define N_TEXTURES_USED 4
+#define N_TEXTURES_USED 7
 #define TEXTURE_ID_FLOOR 0
 #define TEXTURE_ID_WOLF 1
 #define TEXTURE_ID_SPIDER 2
 #define TEXTURE_ID_BEN 3
+#define TEXTURE_ID_BUS 4
+#define TEXTURE_ID_IRONMAN 5
+#define TEXTURE_ID_BIKE 6
 extern GLuint texture_names[N_TEXTURES_USED];
 extern int flag_texture_mapping;
 

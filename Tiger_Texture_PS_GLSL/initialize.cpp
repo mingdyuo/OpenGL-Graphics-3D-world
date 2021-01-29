@@ -111,7 +111,7 @@ void initialize_OpenGL(void) {
 		glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));*/
 	initialize_lights_and_material();
 	initialize_flags();
-
+	
 	glGenTextures(N_TEXTURES_USED, texture_names);
 }
 
@@ -156,8 +156,8 @@ void set_up_scene_lights(void) {
 	light[0].position[0] = 200.0f; light[0].position[1] = 100.0f; 	// point light position in EC
 	light[0].position[2] = 200.0f; light[0].position[3] = 1.0f;
 
-	light[0].ambient_color[0] = 0.43f; light[0].ambient_color[1] = 0.43f;
-	light[0].ambient_color[2] = 0.45f; light[0].ambient_color[3] = 1.0f;
+	light[0].ambient_color[0] = 0.93f; light[0].ambient_color[1] = 0.93f;
+	light[0].ambient_color[2] = 0.95f; light[0].ambient_color[3] = 1.0f;
 
 	light[0].diffuse_color[0] = 0.7f; light[0].diffuse_color[1] = 0.7f;
 	light[0].diffuse_color[2] = 0.8f; light[0].diffuse_color[3] = 1.5f;
@@ -173,16 +173,52 @@ void set_up_scene_lights(void) {
 	light[1].ambient_color[0] = 0.152f; light[1].ambient_color[1] = 0.152f;
 	light[1].ambient_color[2] = 0.152f; light[1].ambient_color[3] = 1.0f;
 
-	light[1].diffuse_color[0] = 0.572f; light[1].diffuse_color[1] = 0.572f;
-	light[1].diffuse_color[2] = 0.572f; light[1].diffuse_color[3] = 1.0f;
+	light[1].diffuse_color[0] = 0.372f; light[1].diffuse_color[1] = 0.372f;
+	light[1].diffuse_color[2] = 0.372f; light[1].diffuse_color[3] = 1.0f;
 
-	light[1].specular_color[0] = 0.772f; light[1].specular_color[1] = 0.772f;
-	light[1].specular_color[2] = 0.772f; light[1].specular_color[3] = 1.0f;
+	light[1].specular_color[0] = 0.472f; light[1].specular_color[1] = 0.472f;
+	light[1].specular_color[2] = 0.472f; light[1].specular_color[3] = 1.0f;
 
 	light[1].spot_direction[0] = -3.0f; light[1].spot_direction[1] = -5.0f; // spot light direction in WC
 	light[1].spot_direction[2] = 0.0f;
 	light[1].spot_cutoff_angle = 17.0f;
 	light[1].spot_exponent = 8.0f;
+
+	light[2].light_on = 0;
+	light[2].position[0] = camera.pos[0]; light[2].position[1] = camera.pos[1]; // spot light position in WC
+	light[2].position[2] = camera.pos[2]; light[2].position[3] = 1.0f;
+
+	light[2].ambient_color[0] = 0.952f; light[2].ambient_color[1] = 0.352f;
+	light[2].ambient_color[2] = 0.352f; light[2].ambient_color[3] = 1.0f;
+
+	light[2].diffuse_color[0] = 0.972f; light[2].diffuse_color[1] = 0.272f;
+	light[2].diffuse_color[2] = 0.272f; light[2].diffuse_color[3] = 1.0f;
+
+	light[2].specular_color[0] = 0.972f; light[2].specular_color[1] = 0.272f;
+	light[2].specular_color[2] = 0.272f; light[2].specular_color[3] = 1.0f;
+
+	light[2].spot_direction[0] = -camera.naxis[0]; light[2].spot_direction[1] = -camera.naxis[0];// spot light direction in WC
+	light[2].spot_direction[2] = -camera.naxis[0];
+	light[2].spot_cutoff_angle = 12.0f;
+	light[2].spot_exponent = 3.0f;
+
+	light[3].light_on = 0;
+	light[3].position[0] = bike.position[0]; light[3].position[1] = bike.position[1]; // spot light position in WC
+	light[3].position[2] = bike.position[2]; light[3].position[3] = 1.0f;
+
+	light[3].ambient_color[0] = 0.252f; light[3].ambient_color[1] = 0.352f;
+	light[3].ambient_color[2] = 0.952f; light[3].ambient_color[3] = 1.0f;
+
+	light[3].diffuse_color[0] = 0.272f; light[3].diffuse_color[1] = 0.372f;
+	light[3].diffuse_color[2] = 0.972f; light[3].diffuse_color[3] = 1.0f;
+
+	light[3].specular_color[0] = 0.272f; light[3].specular_color[1] = 0.272f;
+	light[3].specular_color[2] = 0.972f; light[3].specular_color[3] = 1.0f;
+
+	light[3].spot_direction[0] = bike.direction[0]; light[3].spot_direction[1] = bike.direction[1]; // spot light direction in WC
+	light[3].spot_direction[2] = bike.direction[2];
+	light[3].spot_cutoff_angle = 17.0f;
+	light[3].spot_exponent = 13.0f;
 
 	glUseProgram(h_ShaderProgram_TXPS);
 	glUniform1i(loc_light[0].light_on, light[0].light_on);
@@ -207,23 +243,87 @@ void set_up_scene_lights(void) {
 	glUniform3fv(loc_light[1].spot_direction, 1, &direction_EC[0]);
 	glUniform1f(loc_light[1].spot_cutoff_angle, light[1].spot_cutoff_angle);
 	glUniform1f(loc_light[1].spot_exponent, light[1].spot_exponent);
+
+	glUniform1i(loc_light[2].light_on, light[2].light_on);
+	// need to supply position in EC for shading
+	position_EC =glm::vec4(light[2].position[0], light[2].position[1],
+		light[2].position[2], light[2].position[3]);
+	glUniform4fv(loc_light[2].position, 1, &position_EC[0]);
+	glUniform4fv(loc_light[2].ambient_color, 1, light[2].ambient_color);
+	glUniform4fv(loc_light[2].diffuse_color, 1, light[2].diffuse_color);
+	glUniform4fv(loc_light[2].specular_color, 1, light[2].specular_color);
+	// need to supply direction in EC for shading in this example shader
+	// note that the viewing transform is a rigid body transform
+	// thus transpose(inverse(mat3(ViewMatrix)) = mat3(ViewMatrix)
+	direction_EC = glm::vec3(light[2].spot_direction[0], light[2].spot_direction[1],
+		light[2].spot_direction[2]);
+	glUniform3fv(loc_light[2].spot_direction, 1, &direction_EC[0]);
+	glUniform1f(loc_light[2].spot_cutoff_angle, light[2].spot_cutoff_angle);
+	glUniform1f(loc_light[2].spot_exponent, light[2].spot_exponent);
+
+	glUniform1i(loc_light[3].light_on, light[3].light_on);
+	// need to supply position in EC for shading
+	position_EC = ViewMatrix * glm::vec4(light[3].position[0], light[3].position[1],
+		light[3].position[2], light[3].position[3]);
+	glUniform4fv(loc_light[3].position, 1, &position_EC[0]);
+	glUniform4fv(loc_light[3].ambient_color, 1, light[3].ambient_color);
+	glUniform4fv(loc_light[3].diffuse_color, 1, light[3].diffuse_color);
+	glUniform4fv(loc_light[3].specular_color, 1, light[3].specular_color);
+	// need to supply direction in EC for shading in this example shader
+	// note that the viewing transform is a rigid body transform
+	// thus transpose(inverse(mat3(ViewMatrix)) = mat3(ViewMatrix)
+	direction_EC = glm::mat3(ViewMatrix) * glm::vec3(light[3].spot_direction[0], light[3].spot_direction[1],
+		light[3].spot_direction[2]);
+	glUniform3fv(loc_light[3].spot_direction, 1, &direction_EC[0]);
+	glUniform1f(loc_light[3].spot_cutoff_angle, light[3].spot_cutoff_angle);
+	glUniform1f(loc_light[3].spot_exponent, light[3].spot_exponent);
+
 	glUseProgram(0);
 }
 
 void prepare_scene(void) {
 	prepare_axes();
 	prepare_floor();
+	prepare_floor2();
 	//prepare_tiger();
-	prepare_wolf();
-	prepare_bus();
-	prepare_bike();
-	prepare_spider();
-	prepare_ben();
+	//prepare_wolf();
+	//prepare_bus();
+	//prepare_bike();
+	//prepare_spider();
+	//prepare_ben();
 	bus.prepare();
 	ironman.prepare();
 	bike.prepare();
+	spider.prepare();
+	ben.prepare();
+	wolf.prepare();
 	set_up_scene_lights();
 	camera.initialize();
+
+	glUseProgram(h_ShaderProgram_TXPS);
+	// Must update the light 1's geometry in EC.
+	glm::vec4 position_EC = ViewMatrix * glm::vec4(light[1].position[0], light[1].position[1],
+		light[1].position[2], light[1].position[3]);
+	glUniform4fv(loc_light[1].position, 1, &position_EC[0]);
+	glm::vec3 direction_EC = glm::mat3(ViewMatrix) * glm::vec3(light[1].spot_direction[0],
+		light[1].spot_direction[1], light[1].spot_direction[2]);
+	glUniform3fv(loc_light[1].spot_direction, 1, &direction_EC[0]);
+
+	position_EC = ViewMatrix * glm::vec4(light[2].position[0], light[2].position[1],
+		light[2].position[2], light[2].position[3]);
+	glUniform4fv(loc_light[2].position, 1, &position_EC[0]);
+	direction_EC = glm::mat3(ViewMatrix) * glm::vec3(light[2].spot_direction[0],
+		light[2].spot_direction[1], light[2].spot_direction[2]);
+	glUniform3fv(loc_light[2].spot_direction, 1, &direction_EC[0]);
+
+	position_EC = glm::vec4(light[3].position[0], light[3].position[1],
+		light[3].position[2], light[3].position[3]);
+	glUniform4fv(loc_light[3].position, 1, &position_EC[0]);
+	direction_EC = glm::mat3(ViewMatrix) * glm::vec3(light[3].spot_direction[0],
+		light[3].spot_direction[1], light[3].spot_direction[2]);
+	glUniform3fv(loc_light[3].spot_direction, 1, &direction_EC[0]);
+
+	glUseProgram(0);
 }
 
 void initialize_renderer(void) {

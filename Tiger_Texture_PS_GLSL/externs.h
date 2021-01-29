@@ -2,7 +2,7 @@
 #include "initialize.h"
 #include "floor.h"
 #include "axis.h"
-#include "static_objects.h"
+#include "Object.h"
 #include "camera.h"
 #include <GL/glew.h>
 #include <GL/freeglut.h>
@@ -11,11 +11,16 @@
 #include <glm/gtc/matrix_inverse.hpp> // inverseTranspose, etc.
 
 // texture stuffs
-#define N_TEXTURES_USED 4
+#define N_TEXTURES_USED 9
 #define TEXTURE_ID_FLOOR 0
+#define TEXTURE_ID_FLOOR2 7
 #define TEXTURE_ID_WOLF 1
 #define TEXTURE_ID_SPIDER 2
 #define TEXTURE_ID_BEN 3
+#define TEXTURE_ID_BUS 4
+#define TEXTURE_ID_IRONMAN 5
+#define TEXTURE_ID_IRONMAN2 8
+#define TEXTURE_ID_BIKE 6
 
 
 #define TO_RADIAN 0.01745329252f  
